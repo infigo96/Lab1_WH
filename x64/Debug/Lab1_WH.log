@@ -1,4 +1,0 @@
-﻿  intro.c
-c:\users\hampus\documents\github\lab1_wh\intro.c(45): warning C4133: 'function': incompatible types - from 'void (__cdecl *)(int *)' to 'LPTHREAD_START_ROUTINE'
-c:\users\hampus\documents\github\lab1_wh\intro.c(46): warning C4133: 'function': incompatible types - from 'void (__cdecl *)(int *)' to 'LPTHREAD_START_ROUTINE'
-  Lab1_WH.vcxproj -> C:\Users\Hampus\Documents\GitHub\Lab1_WH\x64\Debug\Lab1_WH.exe
