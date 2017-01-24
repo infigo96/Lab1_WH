@@ -14,6 +14,9 @@ DWORD threadCreate (LPTHREAD_START_ROUTINE threadFunc, LPVOID threadParams) {
 
 	/* Creates a thread running threadFunc */
 	/* optional parameters (NULL otherwise)and returns its id! */
+	DWORD numbar;
+	numbar = CreateThread(NULL, 0, threadFunc, threadParams, 0, &numbar);
+	return numbar;
 }
 
 
