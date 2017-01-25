@@ -37,5 +37,6 @@ main()
 	InitializeCriticalSection(&CS);
 	DWORD numbar = threadCreate((LPTHREAD_START_ROUTINE)HelloWorld, 0);
 	DWORD numbar2 = threadCreate((LPTHREAD_START_ROUTINE)HelloMoon, 0);
+
 	getchar();
 }
