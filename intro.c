@@ -1,48 +1,41 @@
 #include <stdio.h>
+#include <windows.h>
 #include "wrapper.h"
-void HelloMoon(int* a) {
 
-	int i = 0;
-	while (i == i)
-	{
-		while (i < 10 && *a == 1)
-		{
-			Sleep(200);
-			printf("Hello Moon\n");
-			i++;
-			if (i == 10)
-			{
-				i = 0;
-				*a = 0;
-			}
-		}
-	}
-		
-}
-void HelloWorld(int* a)
+CRITICAL_SECTION CS;
+
+void HelloMoon()
 {
-	int i = 0;
-	while (i == i)
+	int i;
+
+	EnterCriticalSection(&CS);
+
+	for (i = 0; i < 10; i++)
 	{
-		while (i < 10 && *a == 0)
-		{
-			Sleep(200);
-			printf("Hello World\n");
-			i++;
-			if (i == 10)
-			{
-				i = 0;
-				*a = 1;
-			}
-			
-		}
+		Sleep(200);
+		printf("Hello Moon\n");
 	}
+
+	LeaveCriticalSection(&CS);
+}
+void HelloWorld()
+{
+	int i;
+
+	EnterCriticalSection(&CS);
+
+	for (i = 0; i < 10; i++)
+	{
+		Sleep(200);
+		printf("Hello World\n");
+	}
+
+	LeaveCriticalSection(&CS);
 }
 main()
 {
-	int a = 0;
-	DWORD numbar = threadCreate(HelloWorld, &a);
-	DWORD numbar2 = threadCreate(HelloMoon, &a);
-	int b = 2;
+	InitializeCriticalSection(&CS);
+	DWORD numbar = threadCreate((LPTHREAD_START_ROUTINE)HelloWorld, 0);
+	DWORD numbar2 = threadCreate((LPTHREAD_START_ROUTINE)HelloMoon, 0);
 	getchar();
 }
