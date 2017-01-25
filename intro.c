@@ -41,8 +41,8 @@ void HelloWorld(int* a)
 main()
 {
 	int a = 0;
-	DWORD numbar = threadCreate(HelloWorld, &a);
-	DWORD numbar2 = threadCreate(HelloMoon, &a);
+	DWORD numbar = threadCreate((LPTHREAD_START_ROUTINE)HelloWorld, &a);
+	DWORD numbar2 = threadCreate((LPTHREAD_START_ROUTINE)HelloMoon, &a);
 	int b = 2;
 	getchar();
 }
