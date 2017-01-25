@@ -9,7 +9,6 @@
 
 /* ATTENTION!!! calls that require a time out, use TIME_OUT constant, specifies that calls are blocked forever */
 
-
 DWORD threadCreate (LPTHREAD_START_ROUTINE threadFunc, LPVOID threadParams) {
 
 	/* Creates a thread running threadFunc */
@@ -24,6 +23,8 @@ HANDLE mailslotCreate (char *name) {
 
 	/* Creates a mailslot with the specified name and returns the handle */
 	/* Should be able to handle a messages of any size */
+	HANDLE hSlot =  CreateMailslot(name, 0, MAILSLOT_WAIT_FOREVER, (LPSECURITY_ATTRIBUTES)NULL);
+	return hSlot;
 }
 
 HANDLE mailslotConnect (char * name) {
