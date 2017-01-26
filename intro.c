@@ -52,6 +52,8 @@ main()
 	}
 	else printf("Mailslot created successfully.\n");
 
+	int fuuuu = mailslotWrite(hSlot, "hej", 3);
+
 	mailslotClose(hSlot);
 	//öppnar den existernade mailsloten
 	hSlot = mailslotConnect(name);

@@ -48,6 +48,8 @@ int mailslotWrite(HANDLE mailSlot, void *msg, int msgSize) {
 
 	/* Write a msg to a mailslot, return nr */
 	/* of successful bytes written         */
+	int written = 0 ;
+	WriteFile(mailSlot, msg, msgSize, written, (LPOVERLAPPED)NULL);
 }
 
 int	mailslotRead (HANDLE mailbox, void *msg, int msgSize) {
