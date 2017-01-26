@@ -31,7 +31,7 @@ HANDLE mailslotConnect (char * name) {
 
 	/* Connects to an existing mailslot for writing */
 	/* and returns the handle upon success     */
-	HANDLE hSlot = CreateFile(name, GENERIC_WRITE, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+	HANDLE hSlot = CreateFile(name, GENERIC_ALL, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 	return hSlot; 
 	/*if (handle == INVALID_HANDLE_VALUE)
 	{
@@ -49,13 +49,37 @@ int mailslotWrite(HANDLE mailSlot, void *msg, int msgSize) {
 	/* Write a msg to a mailslot, return nr */
 	/* of successful bytes written         */
 	int written = 0 ;
-	WriteFile(mailSlot, msg, msgSize, written, (LPOVERLAPPED)NULL);
+	BOOL fResult = WriteFile(mailSlot, (LPSTR)msg, (DWORD)msgSize, &written, (LPOVERLAPPED)NULL);
+	if (!fResult)
+	{
+		printf("WriteFile failed with %d.\n", GetLastError());
+	}
+	else
+	{
+		printf("Slot written to successfully.\n");
+	}
+	
+	return written;
 }
 
 int	mailslotRead (HANDLE mailbox, void *msg, int msgSize) {
 
 	/* Read a msg from a mailslot, return nr */
-	/* of successful bytes read              */
+	OVERLAPPED ov;
+	HANDLE hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	if (NULL == hEvent)
+		return FALSE;
+	ov.Offset = 0;
+	ov.OffsetHigh = 0;
+	ov.hEvent = hEvent;
+
+	int read = 0;
+	BOOL fResult = ReadFile(mailbox, msg, (DWORD)msgSize, &read, &ov);
+	if (!fResult)
+	{
+		printf("ReadFile failed with %d.\n", GetLastError());
+	}
+	return read;
 }
 
 int mailslotClose(HANDLE mailSlot){
