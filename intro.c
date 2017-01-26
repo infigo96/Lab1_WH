@@ -3,6 +3,92 @@
 #include "wrapper.h"
 
 CRITICAL_SECTION CS;
+void buff(char* msg)
+{
+	char dummy;
+	do
+	{   // loop until the new-line is read to remove keyboard buffer
+		dummy = getchar();
+	} while (dummy != '\n');
+	fgets(msg, 1024, stdin);
+	
+	if (*(msg + (strlen(msg) - 1)) == '\n')		//if the last char is \n. Changes it to \0
+	{
+		*(msg + (strlen(msg) - 1)) = '\0';
+	}
+	else		//if the last char is not \n
+	{
+		do
+		{   // loop until the new-line is read to remove keyboard buffer
+			dummy = getchar();
+		} while (dummy != '\n');
+
+	}
+}
+void input()
+{
+	char*  name = "\\\\.\\mailslot\\mailbox";
+	HANDLE hSlot = INVALID_HANDLE_VALUE;
+	while (TRUE)
+	{
+		
+		
+		if (hSlot == INVALID_HANDLE_VALUE)
+		{
+			Sleep(50);
+			hSlot = mailslotConnect(name);
+			if (hSlot == INVALID_HANDLE_VALUE)
+			{
+				printf("Connect Mailslot failed with error code: %d\n", GetLastError());
+			}
+		}
+		else
+		{
+			char* message = malloc(1024);
+			buff(message);
+
+			int written = mailslotWrite(hSlot, message, strlen(message)+1);
+			printf("written: %d\n", written);
+			free(message);
+		}
+	}
+}
+void output()
+{
+	char*  name = "\\\\.\\mailslot\\mailbox";
+	HANDLE hSlot = mailslotCreate(name);
+	if (hSlot == INVALID_HANDLE_VALUE)
+	{
+		printf("Create Mailslot failed error code: %d\n", GetLastError());
+	}
+	else printf("Mailslot created successfully.\n");
+
+	int msgSize = 0;
+
+	while(TRUE)
+	{
+		
+				
+		//medelande = "now go and die you fucked up WIN32 c";
+		GetMailslotInfo(hSlot, 0, &msgSize, 0, 0);
+		//printf("%d\n", msgSize);
+
+		if (msgSize != -1)
+		{
+			char* message = malloc(msgSize + 1);
+			//fuuuu = strlen(kakaor);
+
+			int charRead = mailslotRead(hSlot, message, msgSize);
+			message[charRead] = '\0';
+
+			printf("kukarnas %d\n", charRead);
+			printf("%s\n", message);
+			//closes the mailslot
+			free(message);
+		}
+	}
+	mailslotClose(hSlot);
+}
 void HelloMoon()
 {
 	int i = 0;
@@ -40,45 +126,20 @@ void HelloWorld()
 main()
 {
 	//InitializeCriticalSection(&CS);
-	//DWORD numbar = threadCreate((LPTHREAD_START_ROUTINE)HelloWorld, 0);
-	//DWORD numbar2 = threadCreate((LPTHREAD_START_ROUTINE)HelloMoon, 0);
+	DWORD numbar = threadCreate((LPTHREAD_START_ROUTINE)input, 0);
+	DWORD numbar2 = threadCreate((LPTHREAD_START_ROUTINE)output, 0);
 	
 	//Skapar mailslot
-	char*  name = "\\\\.\\mailslot\\mailbox";
-	HANDLE hSlot = mailslotCreate(name);
-	if (hSlot == INVALID_HANDLE_VALUE)
-	{
-		printf("Create Mailslot failed error code: %d\n", GetLastError());
-	}
-	else printf("Mailslot created successfully.\n");
-
+	
 	
 	//mailslotClose(hSlot);
 	//öppnar den existernade mailsloten
-	HANDLE hSlot2 = mailslotConnect(name);
-	if (hSlot2 == INVALID_HANDLE_VALUE)
-	{
-		printf("Connect Mailslot failed with error code: %d\n", GetLastError());
-	}
-	else printf("Mailslot open successfully.\n");
-
-	char* medelande = "Fuck you I hate your silly little fucking ass of massdestruction and cocks";
-	int fuuuu = mailslotWrite(hSlot2, medelande, strlen(medelande));
-	printf("%d\n", fuuuu);
+	
+	//eoifwoeijfowiejfowi
 
 
-	medelande = "now go and die you fucked up WIN32 c";
-	GetMailslotInfo(hSlot, 0, &fuuuu, 0, 0);
-	printf("%d\n", fuuuu);
 
-	char* kakaor = malloc(fuuuu);
-	fuuuu = strlen(kakaor);
-	fuuuu = mailslotRead(hSlot, kakaor, fuuuu);
-	printf("kukarnas %d\n", fuuuu);
-	kakaor[fuuuu] = '\0';
-	printf("%s\n", kakaor);
-	//closes the mailslot
-	mailslotClose(hSlot);
+	
 	
 	getchar();
 
