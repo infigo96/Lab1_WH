@@ -6,10 +6,7 @@ CRITICAL_SECTION CS;
 void buff(char* msg)
 {
 	char dummy;
-	do
-	{   // loop until the new-line is read to remove keyboard buffer
-		dummy = getchar();
-	} while (dummy != '\n');
+	//while ((dummy = getchar()) != '\n' && dummy != EOF)
 	fgets(msg, 1024, stdin);
 	
 	if (*(msg + (strlen(msg) - 1)) == '\n')		//if the last char is \n. Changes it to \0
@@ -46,8 +43,9 @@ void input()
 		{
 			char* message = malloc(1024);
 			buff(message);
-
+			EnterCriticalSection(&CS);
 			int written = mailslotWrite(hSlot, message, strlen(message)+1);
+			LeaveCriticalSection(&CS);
 			printf("written: %d\n", written);
 			free(message);
 		}
@@ -78,12 +76,15 @@ void output()
 			char* message = malloc(msgSize + 1);
 			//fuuuu = strlen(kakaor);
 
+			EnterCriticalSection(&CS);
 			int charRead = mailslotRead(hSlot, message, msgSize);
-			message[charRead] = '\0';
+			char* upp = message;
+			//message[charRead] = '\0';
+			LeaveCriticalSection(&CS);
 
-			printf("kukarnas %d\n", charRead);
-			printf("%s\n", message);
-			//closes the mailslot
+			//printf("kukarnas %d\n", charRead);
+			//printf("%s\n", message);
+			printf("grej");
 			free(message);
 		}
 	}
@@ -125,7 +126,7 @@ void HelloWorld()
 }
 main()
 {
-	//InitializeCriticalSection(&CS);
+	InitializeCriticalSection(&CS);
 	DWORD numbar = threadCreate((LPTHREAD_START_ROUTINE)input, 0);
 	DWORD numbar2 = threadCreate((LPTHREAD_START_ROUTINE)output, 0);
 	
