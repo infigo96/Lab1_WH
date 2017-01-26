@@ -6,7 +6,7 @@ CRITICAL_SECTION CS;
 void buff(char* msg)
 {
 	char dummy;
-	//while ((dummy = getchar()) != '\n' && dummy != EOF)
+	
 	fgets(msg, 1024, stdin);
 	
 	if (*(msg + (strlen(msg) - 1)) == '\n')		//if the last char is \n. Changes it to \0
