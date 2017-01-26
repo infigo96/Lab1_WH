@@ -44,20 +44,22 @@ main()
 	//DWORD numbar2 = threadCreate((LPTHREAD_START_ROUTINE)HelloMoon, 0);
 	
 	//Skapar mailslot
-	HANDLE hSlot = mailslotCreate("\\\\.\\mailslot\\blort");
+	char* name = "\\\\.\\mailslot\\mailbox";
+	HANDLE hSlot = mailslotCreate(name);
 	if (hSlot == INVALID_HANDLE_VALUE)
 	{
-		printf("CreateMailslot failed with %d\n", GetLastError());
+		printf("Create Mailslot failed error code: %d\n", GetLastError());
 	}
 	else printf("Mailslot created successfully.\n");
 
-	//öppnar mailsloten
-	hSlot = mailslotConnect("\\\\.\\mailslot\\blort");
+	mailslotClose(hSlot);
+	//öppnar den existernade mailsloten
+	hSlot = mailslotConnect(name);
 	if (hSlot == INVALID_HANDLE_VALUE)
 	{
-		printf("CreateMailslot failed with %d\n", GetLastError());
+		printf("Connect Mailslot failed with error code: %d\n", GetLastError());
 	}
-	else printf("Mailslot created successfully.\n");
+	else printf("Mailslot open successfully.\n");
 
 	//closes the mailslot
 	mailslotClose(hSlot);

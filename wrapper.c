@@ -31,17 +31,17 @@ HANDLE mailslotConnect (char * name) {
 
 	/* Connects to an existing mailslot for writing */
 	/* and returns the handle upon success     */
-	HANDLE handle = CreateFile("\\\\MyComputer\\mailslot\\blort", GENERIC_WRITE, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
-		
-	if (handle == INVALID_HANDLE_VALUE)
+	HANDLE hSlot = CreateFile(name, GENERIC_WRITE, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+	return hSlot; 
+	/*if (handle == INVALID_HANDLE_VALUE)
 	{
 		printf("Can´t open mailbox");
-		return NULL;
+		return handle;
 	}
 	else
 	{
 		return handle;
-	}
+	}*/
 }
 
 int mailslotWrite(HANDLE mailSlot, void *msg, int msgSize) {
