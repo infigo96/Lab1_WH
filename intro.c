@@ -46,12 +46,12 @@ void input()
 			EnterCriticalSection(&CS);
 			int written = mailslotWrite(hSlot, message, strlen(message)+1);
 			LeaveCriticalSection(&CS);
-			printf("written: %d\n", written);
+			//printf("written: %d\n", written);
 			free(message);
 		}
 	}
 }
-void output()
+void output(BOOL* end)
 {
 	char*  name = "\\\\.\\mailslot\\mailbox";
 	HANDLE hSlot = mailslotCreate(name);
@@ -62,8 +62,7 @@ void output()
 	else printf("Mailslot created successfully.\n");
 
 	int msgSize = 0;
-
-	while(TRUE)
+	while(*end == FALSE)
 	{
 		
 				
@@ -83,9 +82,17 @@ void output()
 			LeaveCriticalSection(&CS);
 
 			//printf("kukarnas %d\n", charRead);
-			//printf("%s\n", message);
-			printf("grej");
-			free(message);
+			printf("Message was: %s\n", message);
+			if (strcmp("END",message) == 0)
+			{
+				*end = TRUE;
+				free(message);
+			}
+			else
+			{
+				free(message);
+			}
+			
 		}
 	}
 	mailslotClose(hSlot);
@@ -126,9 +133,10 @@ void HelloWorld()
 }
 main()
 {
+	BOOL end = FALSE;
 	InitializeCriticalSection(&CS);
 	DWORD numbar = threadCreate((LPTHREAD_START_ROUTINE)input, 0);
-	DWORD numbar2 = threadCreate((LPTHREAD_START_ROUTINE)output, 0);
+	DWORD numbar2 = threadCreate((LPTHREAD_START_ROUTINE)output, &end);
 	
 	//Skapar mailslot
 	
@@ -141,8 +149,10 @@ main()
 
 
 	
-	
-	getchar();
+	while (end == FALSE)
+	{
+
+	}
 
 	
 }
