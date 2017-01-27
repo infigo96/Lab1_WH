@@ -2,6 +2,7 @@
 #include <windows.h>
 #include "wrapper.h"
 
+
 CRITICAL_SECTION CS;
 void buff(char* msg)
 {
@@ -24,7 +25,7 @@ void buff(char* msg)
 }
 void input()
 {
-	char*  name = "\\\\.\\mailslot\\mailbox";
+	char*  name = "mailbox";
 	HANDLE hSlot = INVALID_HANDLE_VALUE;
 	while (TRUE)
 	{
@@ -38,14 +39,20 @@ void input()
 			{
 				printf("Connect Mailslot failed with error code: %d\n", GetLastError());
 			}
+			else
+			{
+				printf("Mailslot connected successfully\n");
+			}
 		}
 		else
 		{
 			char* message = malloc(1024);
 			buff(message);
+
 			EnterCriticalSection(&CS);
 			int written = mailslotWrite(hSlot, message, strlen(message)+1);
 			LeaveCriticalSection(&CS);
+
 			//printf("written: %d\n", written);
 			free(message);
 		}
@@ -53,7 +60,7 @@ void input()
 }
 void output(BOOL* end)
 {
-	char*  name = "\\\\.\\mailslot\\mailbox";
+	char*  name = "mailbox";
 	HANDLE hSlot = mailslotCreate(name);
 	if (hSlot == INVALID_HANDLE_VALUE)
 	{
@@ -62,22 +69,18 @@ void output(BOOL* end)
 	else printf("Mailslot created successfully.\n");
 
 	int msgSize = 0;
-	while(*end == FALSE)
-	{
-		
-				
-		//medelande = "now go and die you fucked up WIN32 c";
+	while(TRUE)
+	{				
 		GetMailslotInfo(hSlot, 0, &msgSize, 0, 0);
-		//printf("%d\n", msgSize);
-
-		if (msgSize != -1)
+		//printf("%d\n", msgSize)
+		
+		if (msgSize != -1 && *end == FALSE)
 		{
 			char* message = malloc(msgSize + 1);
 			//fuuuu = strlen(kakaor);
 
 			EnterCriticalSection(&CS);
 			int charRead = mailslotRead(hSlot, message, msgSize);
-			char* upp = message;
 			//message[charRead] = '\0';
 			LeaveCriticalSection(&CS);
 
@@ -86,16 +89,10 @@ void output(BOOL* end)
 			if (strcmp("END",message) == 0)
 			{
 				*end = TRUE;
-				free(message);
+				mailslotClose(hSlot);
 			}
-			else
-			{
-				free(message);
-			}
-			
 		}
 	}
-	mailslotClose(hSlot);
 }
 void HelloMoon()
 {
@@ -138,21 +135,8 @@ main()
 	DWORD numbar = threadCreate((LPTHREAD_START_ROUTINE)input, 0);
 	DWORD numbar2 = threadCreate((LPTHREAD_START_ROUTINE)output, &end);
 	
-	//Skapar mailslot
-	
-	
-	//mailslotClose(hSlot);
-	//öppnar den existernade mailsloten
-	
-	//eoifwoeijfowiejfowi
-
-
-
-	
 	while (end == FALSE)
 	{
 
-	}
-
-	
+	}	
 }
