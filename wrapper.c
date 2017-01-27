@@ -20,16 +20,20 @@ DWORD threadCreate (LPTHREAD_START_ROUTINE threadFunc, LPVOID threadParams) {
 
 
 HANDLE mailslotCreate (char *name) {
+	char directory[100] = "\\\\.\\mailslot\\";
+	strcat(directory, name);
 	/* Creates a mailslot with the specified name and returns the handle */
 	/* Should be able to handle a messages of any size */
-	HANDLE hSlot =  CreateMailslot(TEXT("\\\\.\\mailslot\\%s",name), 0, MAILSLOT_WAIT_FOREVER, (LPSECURITY_ATTRIBUTES)NULL);
+	HANDLE hSlot =  CreateMailslot(directory, 0, MAILSLOT_WAIT_FOREVER, (LPSECURITY_ATTRIBUTES)NULL);
 	return hSlot;
 }
 
 HANDLE mailslotConnect (char * name) {
 	/* Connects to an existing mailslot for writing */
 	/* and returns the handle upon success     */
-	HANDLE hSlot = CreateFile(TEXT("\\\\.\\mailslot\\%s", name), GENERIC_ALL, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+	char directory[100] = "\\\\.\\mailslot\\";
+	strcat(directory, name);
+	HANDLE hSlot = CreateFile(directory, GENERIC_ALL, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 	return hSlot;
 	
 	/*if (handle == INVALID_HANDLE_VALUE)
@@ -73,7 +77,7 @@ int	mailslotRead (HANDLE mailbox, void *msg, int msgSize) {
 	ov.hEvent = hEvent;*/
 
 	int read = 0;
-	BOOL fResult = ReadFile(mailbox, msg, (DWORD)msgSize, &read, 0);
+	BOOL fResult = ReadFile(mailbox, msg, (DWORD)msgSize, &read, NULL);
 	if (!fResult)
 	{
 		printf("ReadFile failed with %d.\n", GetLastError());

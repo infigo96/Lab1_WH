@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include <windows.h>
 #include "wrapper.h"
-
+typedef struct MESSAGE
+{
+	char* inf;
+}MESSAGE;
 
 CRITICAL_SECTION CS;
 void buff(char* msg)
@@ -46,14 +49,17 @@ void input()
 		}
 		else
 		{
-			char* message = malloc(1024);
-			buff(message);
+			MESSAGE* message = malloc(sizeof(MESSAGE*));
+			message->inf = malloc(1024);
+
+			buff(message->inf);
 
 			EnterCriticalSection(&CS);
-			int written = mailslotWrite(hSlot, message, strlen(message)+1);
+			int written = mailslotWrite(hSlot, message->inf, strlen(message->inf)+1);
 			LeaveCriticalSection(&CS);
 
 			//printf("written: %d\n", written);
+			free(message->inf);
 			free(message);
 		}
 	}
@@ -76,22 +82,33 @@ void output(BOOL* end)
 		
 		if (msgSize != -1 && *end == FALSE)
 		{
-			char* message = malloc(msgSize + 1);
+			MESSAGE* message = malloc(sizeof(MESSAGE*));
+			message->inf = malloc(msgSize + 1);
 			//fuuuu = strlen(kakaor);
 
 			EnterCriticalSection(&CS);
-			int charRead = mailslotRead(hSlot, message, msgSize);
+			int charRead = mailslotRead(hSlot, message->inf, msgSize);
 			//message[charRead] = '\0';
 			LeaveCriticalSection(&CS);
 
 			//printf("kukarnas %d\n", charRead);
-			printf("Message was: %s\n", message);
-			if (strcmp("END",message) == 0)
+			printf("Message was: %s\n", message->inf);
+			if (strcmp("END",message->inf) == 0)
 			{
-				*end = TRUE;
+				free(message->inf);
+				free(message);
 				mailslotClose(hSlot);
+				*end = TRUE;
+				
 			}
+			else
+			{
+				free(message->inf);
+				free(message);
+			}
+			
 		}
+		
 	}
 }
 void HelloMoon()
@@ -132,8 +149,8 @@ main()
 {
 	BOOL end = FALSE;
 	InitializeCriticalSection(&CS);
-	DWORD numbar = threadCreate((LPTHREAD_START_ROUTINE)input, 0);
-	DWORD numbar2 = threadCreate((LPTHREAD_START_ROUTINE)output, &end);
+	DWORD thread1 = threadCreate((LPTHREAD_START_ROUTINE)input, 0);
+	DWORD thread2 = threadCreate((LPTHREAD_START_ROUTINE)output, &end);
 	
 	while (end == FALSE)
 	{
