@@ -5,10 +5,9 @@
 
 #define TIMERID			100  /* id for timer that is used by the thread that manages the window where graphics is drawn */
 #define DEFAULT_STACK_SIZE	1024
-#define TIME_OUT			MAILSLOT_WAIT_FOREVER 
+#define TIME_OUT			MAILSLOT_WAIT_FOREVER
 
 /* ATTENTION!!! calls that require a time out, use TIME_OUT constant, specifies that calls are blocked forever */
-
 
 DWORD threadCreate (LPTHREAD_START_ROUTINE threadFunc, LPVOID threadParams) {
 
@@ -21,32 +20,75 @@ DWORD threadCreate (LPTHREAD_START_ROUTINE threadFunc, LPVOID threadParams) {
 
 
 HANDLE mailslotCreate (char *name) {
-
+	char directory[100] = "\\\\.\\mailslot\\";
+	strcat(directory, name);
 	/* Creates a mailslot with the specified name and returns the handle */
 	/* Should be able to handle a messages of any size */
+	HANDLE hSlot =  CreateMailslot(directory, 0, MAILSLOT_WAIT_FOREVER, (LPSECURITY_ATTRIBUTES)NULL);
+	return hSlot;
 }
 
 HANDLE mailslotConnect (char * name) {
-
 	/* Connects to an existing mailslot for writing */
 	/* and returns the handle upon success     */
+	char directory[100] = "\\\\.\\mailslot\\";
+	strcat(directory, name);
+	HANDLE hSlot = CreateFile(directory, GENERIC_ALL, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+	return hSlot;
+	
+	/*if (handle == INVALID_HANDLE_VALUE)
+	{
+		printf("Can´t open mailbox");
+		return handle;
+	}
+	else
+	{
+		return handle;
+	}*/
 }
 
 int mailslotWrite(HANDLE mailSlot, void *msg, int msgSize) {
 
 	/* Write a msg to a mailslot, return nr */
 	/* of successful bytes written         */
+	int written = 0 ;
+	BOOL fResult = WriteFile(mailSlot, (LPSTR)msg, (DWORD)msgSize, &written, (LPOVERLAPPED)NULL);
+	if (!fResult)
+	{
+		printf("WriteFile failed with %d.\n", GetLastError());
+	}
+	else
+	{
+		//printf("Slot written to successfully.\n");
+	}
+
+	return written;
 }
 
 int	mailslotRead (HANDLE mailbox, void *msg, int msgSize) {
 
 	/* Read a msg from a mailslot, return nr */
-	/* of successful bytes read              */
+	/*OVERLAPPED ov;
+	HANDLE hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	if (NULL == hEvent)
+		return FALSE;
+	ov.Offset = 0;
+	ov.OffsetHigh = 0;
+	ov.hEvent = hEvent;*/
+
+	int read = 0;
+	BOOL fResult = ReadFile(mailbox, msg, (DWORD)msgSize, &read, NULL);
+	if (!fResult)
+	{
+		printf("ReadFile failed with %d.\n", GetLastError());
+	}
+	return read;
 }
 
 int mailslotClose(HANDLE mailSlot){
-	
+
 	/* close a mailslot, returning whatever the service call returns */
+	return CloseHandle(mailSlot);
 }
 
 
@@ -57,7 +99,7 @@ int mailslotClose(HANDLE mailSlot){
 HWND windowCreate (HINSTANCE hPI, HINSTANCE hI, int ncs, char *title, WNDPROC callbackFunc, int bgcolor) {
 
   HWND hWnd;
-  WNDCLASS wc; 
+  WNDCLASS wc;
 
   /* initialize and create the presentation window        */
   /* NOTE: The only important thing to you is that we     */
@@ -124,7 +166,7 @@ HANDLE OpenFileDialog(char* string, DWORD accessMode, DWORD howToCreate)
 	OPENFILENAME opf;
 	char szFileName[_MAX_PATH]="";
 
-	opf.Flags				= OFN_SHOWHELP | OFN_OVERWRITEPROMPT; 
+	opf.Flags				= OFN_SHOWHELP | OFN_OVERWRITEPROMPT;
 	opf.lpstrDefExt			= "dat";
 	opf.lpstrCustomFilter	= NULL;
 	opf.lStructSize			= sizeof(OPENFILENAME);
@@ -135,19 +177,19 @@ HANDLE OpenFileDialog(char* string, DWORD accessMode, DWORD howToCreate)
 	opf.nMaxFileTitle		= _MAX_FNAME;
 	opf.lpstrInitialDir		= NULL;
 	opf.lpstrTitle			= string;
-	opf.lpstrFileTitle		= NULL ; 
-	
+	opf.lpstrFileTitle		= NULL ;
+
 	if(accessMode == GENERIC_READ)
 		GetOpenFileName(&opf);
 	else
 		GetSaveFileName(&opf);
 
-	return CreateFile(szFileName, 
-		accessMode, 
-		0, 
-		NULL, 
-		howToCreate, 
-		FILE_ATTRIBUTE_NORMAL, 
+	return CreateFile(szFileName,
+		accessMode,
+		0,
+		NULL,
+		howToCreate,
+		FILE_ATTRIBUTE_NORMAL,
 		NULL);
 
 
