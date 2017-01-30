@@ -55,12 +55,12 @@ void input()
 			buff(message->inf);
 
 			EnterCriticalSection(&CS);
-			int written = mailslotWrite(hSlot, message->inf, strlen(message->inf)+1);
+			int written = mailslotWrite(hSlot, message, sizeof(MESSAGE));
 			LeaveCriticalSection(&CS);
 
 			//printf("written: %d\n", written);
-			free(message->inf);
-			free(message);
+			//free(message->inf);
+			//free(message);
 		}
 	}
 }
@@ -83,11 +83,9 @@ void output(BOOL* end)
 		if (msgSize != -1 && *end == FALSE)
 		{
 			MESSAGE* message = malloc(sizeof(MESSAGE*));
-			message->inf = malloc(msgSize + 1);
-			//fuuuu = strlen(kakaor);
-
+			
 			EnterCriticalSection(&CS);
-			int charRead = mailslotRead(hSlot, message->inf, msgSize);
+			int charRead = mailslotRead(hSlot, message, sizeof(MESSAGE));
 			//message[charRead] = '\0';
 			LeaveCriticalSection(&CS);
 

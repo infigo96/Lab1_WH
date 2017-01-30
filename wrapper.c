@@ -52,7 +52,7 @@ int mailslotWrite(HANDLE mailSlot, void *msg, int msgSize) {
 	/* Write a msg to a mailslot, return nr */
 	/* of successful bytes written         */
 	int written = 0 ;
-	BOOL fResult = WriteFile(mailSlot, (LPSTR)msg, (DWORD)msgSize, &written, (LPOVERLAPPED)NULL);
+	BOOL fResult = WriteFile(mailSlot, msg, (DWORD)msgSize, &written, (LPOVERLAPPED)NULL);
 	if (!fResult)
 	{
 		printf("WriteFile failed with %d.\n", GetLastError());
@@ -76,7 +76,7 @@ int	mailslotRead (HANDLE mailbox, void *msg, int msgSize) {
 	ov.OffsetHigh = 0;
 	ov.hEvent = hEvent;*/
 
-	int read = 0;
+	DWORD read;
 	BOOL fResult = ReadFile(mailbox, msg, (DWORD)msgSize, &read, NULL);
 	if (!fResult)
 	{
